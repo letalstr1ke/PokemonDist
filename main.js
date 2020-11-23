@@ -14,11 +14,13 @@ const character = {
   abilities: [
     {
       name: 'Thunder Jolt',
-      damage: random(15)
+      damage: random(15),
+      charges: 6,
     },
     {
       name: 'Pika Papow',
-      damage: random(25)
+      damage: random(25),
+      charges: 4,
     }
   ],
   renderHP: renderHP,
@@ -89,8 +91,14 @@ function initCharakterAbilities(person) {
     abilityButton.classList.add('button');
     abilityButton.innerText = person.abilities[i].name;
 
+    const clickHandler = clicksCount(person.abilities[i].charges, person.abilities[i].name);
+
     abilityButton.addEventListener('click', function(){
 
+      if(!clickHandler()){
+        this.disabled = true;
+        return;
+      }
       enemy.changeHP(random(person.abilities[i].damage));
 
     });  
@@ -129,6 +137,19 @@ function generatorLog(firstPerson, secondPerson, count){
 
 }
 
+function clicksCount(counter, name) {
+  
+  return function () {
+    
+    const $p = document.createElement('p');
+    $p.style = 'color:red;';
+    $p.innerText = `Осталось ${--counter} зарядов у способности ${name}`; 
+    $logger.insertBefore($p, $logger.children[0]);
+
+    return counter > 0 ? true : false;
+  }
+
+}
 
 
 init();
