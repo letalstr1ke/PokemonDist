@@ -1,83 +1,37 @@
+import Pokemon from "./js/pokemon.js";
+import random from "./js/utils.js";
+
 const $abilities = document.querySelector('#abilities');
 const $logger = document.querySelector('#logs');
 
-const character = {
+const player1 = new Pokemon({
   name: 'Pikachu',
-  defaultHP: 100,
-  damageHP: 100,
-  hp: {
-    current: 100,
-    total: 100,
-  },
-  elHP: document.getElementById('health-character'),
-  elProgressbar: document.getElementById('progressbar-character'),
+  type: 'electric',
+  hp: 500,
+  selectors: 'character',
   abilities: [
     {
       name: 'Thunder Jolt',
-      damage: random(15)
+      damage: random(15),
+      charges: 6,
     },
     {
       name: 'Pika Papow',
-      damage: random(25)
+      damage: random(25),
+      charges: 4,
     }
   ],
-  renderHP: renderHP,
-  renderHPLife: renderHPLife,
-  renderHPProgressbar: renderHPProgressbar,
-  changeHP: changeHP,
-}
+});
 
-const enemy = {
+const player2 = new Pokemon({
   name: 'Charmander',
-  defaultHP: 100,
-  damageHP: 100,
-  hp: {
-    current: 150,
-    total: 150,
-  },
-  elHP: document.getElementById('health-enemy'),
-  elProgressbar: document.getElementById('progressbar-enemy'),
-  renderHP: renderHP,
-  renderHPLife: renderHPLife,
-  renderHPProgressbar: renderHPProgressbar,
-  changeHP: changeHP,
-}
+  type: 'fire',
+  hp: 400,
+  selectors: 'enemy',
+});
 
 function init() {
-  character.renderHP();
-  enemy.renderHP();
-  initCharakterAbilities(character);
-}
-
-function renderHP() {
-  this.renderHPLife();
-  this.renderHPProgressbar();
-}
-
-function renderHPLife() {
-  this.elHP.innerText = this.hp.current + ' / ' + this.hp.total;
-}
-
-function renderHPProgressbar() {  
-  this.elProgressbar.style.width = Math.floor( (this.hp.current/this.hp.total) * 100 ) + '%';
-}
-
-function changeHP(count){
-  this.hp.current -= count;
-
-  const log = this === enemy ? generatorLog(this, character, count) : generatorLog(this, enemy, count);
-
-  if(this.hp.current <= 0){
-    this.hp.current = 0;
-    alert(this.name + 'Проиграл бой!');
-    disableAllAbilities();
-  }
-
-  this.renderHP();
-}
-
-function random(num) {
-  return Math.ceil(Math.random() * num);
+  initCharakterAbilities(player1);
 }
 
 function initCharakterAbilities(person) {
@@ -89,9 +43,17 @@ function initCharakterAbilities(person) {
     abilityButton.classList.add('button');
     abilityButton.innerText = person.abilities[i].name;
 
+    const clickHandler = clicksCount(person.abilities[i].charges, person.abilities[i].name);
+
     abilityButton.addEventListener('click', function(){
 
-      enemy.changeHP(random(person.abilities[i].damage));
+      if(!clickHandler()){
+        this.disabled = true;
+        return;
+      }
+      player2.changeHP(random(person.abilities[i].damage), function(count) {
+        generatorLog(player1, player2, count)
+      });
 
     });  
 
@@ -129,6 +91,19 @@ function generatorLog(firstPerson, secondPerson, count){
 
 }
 
+function clicksCount(counter, name) {
+  
+  return function () {
+    
+    const $p = document.createElement('p');
+    $p.style = 'color:red;';
+    $p.innerText = `Осталось ${--counter} зарядов у способности ${name}`; 
+    $logger.insertBefore($p, $logger.children[0]);
+
+    return counter > 0 ? true : false;
+  }
+
+}
 
 
 init();
