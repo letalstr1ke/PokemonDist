@@ -1,6 +1,6 @@
 import Pokemon from "./pokemon.js";
 import random from "./utils.js";
-import { pokemons } from "../pokemons.js";
+import Network from './network.js';
 
 class GameController{
   constructor() {
@@ -21,7 +21,8 @@ class GameController{
     });
   }
 
-  startGame = () => {
+  startGame =  async () => {
+    const pokemons = await this.getAllPokemons();
     const pikachu = pokemons.find(item => item.name === 'Pikachu');
     const enemy = pokemons[random(0, pokemons.length - 1)];
 
@@ -60,7 +61,8 @@ class GameController{
     });
   }
 
-  resetGame = () => {
+  resetGame = async () => {
+    const pokemons = await this.getAllPokemons();
     const enemy = pokemons[random(0, pokemons.length - 1)];
 
     this.player2 = new Pokemon({
@@ -109,6 +111,13 @@ class GameController{
     $p.innerText = logs[random(0, logs.length -1)];
     this.$logger.insertBefore($p, this.$logger.children[0]);
 
+  }
+
+  getAllPokemons = async () => {
+    const q = await fetch(`https://reactmarathon-api.netlify.app/api/pokemons`);
+    const body = await q.json();
+
+    return body;
   }
 
 }
